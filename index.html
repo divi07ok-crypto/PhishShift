@@ -1,0 +1,470 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishShift | Security Dashboard</title>
+
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #121a2d;
+            --border: #25314a;
+            --text: #eef3ff;
+            --muted: #9aa9c4;
+            --blue: #6ea8fe;
+            --red: #ff647c;
+            --green: #4adea2;
+            --yellow: #ffd166;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: radial-gradient(ellipse at top, #172747, var(--bg) 55%);
+            color: var(--text);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: auto;
+            padding: 28px 20px 50px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .brand { font-size: 25px; font-weight: 800; }
+        .brand span, h1 span { color: var(--blue); }
+
+        .status {
+            color: var(--green);
+            border: 1px solid #286b57;
+            background: #102d29;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        h1 { font-size: clamp(30px, 5vw, 43px); margin: 0 0 10px; }
+        h2 { font-size: 19px; margin: 0 0 16px; }
+        .muted { color: var(--muted); line-height: 1.6; }
+        .intro { margin-bottom: 28px; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+            margin: 24px 0;
+        }
+
+        .card, .panel {
+            background: rgba(18, 26, 45, .94);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .stat-label { color: var(--muted); font-size: 13px; }
+        .stat-number { font-size: 32px; font-weight: 800; margin-top: 12px; }
+        .blue { color: var(--blue); }
+        .red { color: var(--red); }
+        .green { color: var(--green); }
+        .yellow { color: var(--yellow); }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 155px;
+            resize: vertical;
+            background: #0b1325;
+            border: 1px solid #31415e;
+            color: var(--text);
+            border-radius: 11px;
+            padding: 14px;
+            font: inherit;
+            line-height: 1.6;
+            outline: none;
+        }
+
+        textarea:focus { border-color: var(--blue); }
+
+        .input-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0 16px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        button, .download {
+            display: inline-block;
+            border: 0;
+            border-radius: 10px;
+            padding: 12px 17px;
+            background: var(--blue);
+            color: #071225;
+            font-weight: 800;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover, .download:hover { filter: brightness(1.1); }
+        .full { width: 100%; }
+
+        .notice {
+            border: 1px solid var(--border);
+            background: #0d1528;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin-top: 16px;
+        }
+
+        .result {
+            margin-top: 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            background: #0d1528;
+        }
+
+        .result-title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .bar {
+            height: 8px;
+            background: #27334b;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--blue);
+            border-radius: 20px;
+        }
+
+        .cue {
+            display: inline-block;
+            background: #3a202d;
+            color: #ff9aaa;
+            border-radius: 6px;
+            padding: 5px 8px;
+            margin: 4px 4px 0 0;
+            font-size: 12px;
+        }
+
+        .chart-wrap {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .donut {
+            width: 150px;
+            height: 150px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: conic-gradient(
+                var(--red) 0% var(--phish),
+                var(--green) var(--phish) var(--legit),
+                var(--yellow) var(--legit) 100%
+            );
+        }
+
+        .donut-inner {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            background: var(--panel);
+            display: grid;
+            place-content: center;
+            text-align: center;
+        }
+
+        .legend { display: grid; gap: 12px; font-size: 13px; }
+
+        .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        .history-panel { margin-top: 20px; }
+        .table-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+
+        th, td {
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            padding: 13px 10px;
+            font-size: 12px;
+            vertical-align: top;
+        }
+
+        th { color: var(--muted); font-weight: 600; }
+        td.message-cell { max-width: 300px; overflow-wrap: anywhere; }
+        .pill { font-weight: 800; font-size: 11px; }
+        .empty { padding: 20px 0; color: var(--muted); font-size: 13px; }
+        footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 28px; }
+
+        @media (max-width: 800px) {
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 420px) {
+            .container { padding: 20px 12px; }
+            .stats { gap: 9px; }
+            .card, .panel { padding: 15px; }
+            .stat-number { font-size: 27px; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <header>
+        <div class="brand">🛡️ Phish<span>Shift</span></div>
+        <div class="status">● LOCAL SCANNER</div>
+    </header>
+
+    <section class="intro">
+        <p class="blue"><strong>INTELLIGENT MESSAGE SECURITY</strong></p>
+        <h1>Detect threats. <span>Stay one step ahead.</span></h1>
+        <p class="muted">
+            Scan suspicious messages, review your scan history,
+            and export your security report.
+        </p>
+    </section>
+
+    <!-- Dashboard statistics -->
+    <section class="stats">
+        <div class="card">
+            <div class="stat-label">TOTAL SCANS</div>
+            <div class="stat-number blue">{{ stats.total_scans }}</div>
+        </div>
+
+        <div class="card">
+            <div class="stat-label">PHISHING DETECTED</div>
+            <div class="stat-number red">{{ stats.phishing_count }}</div>
+        </div>
+
+        <div class="card">
+            <div class="stat-label">LEGITIMATE</div>
+            <div class="stat-number green">{{ stats.legitimate_count }}</div>
+        </div>
+
+        <div class="card">
+            <div class="stat-label">UNCERTAIN</div>
+            <div class="stat-number yellow">{{ stats.uncertain_count }}</div>
+        </div>
+    </section>
+
+    <section class="main-grid">
+
+        <!-- Message scanner -->
+        <div class="panel">
+            <h2>🔎 Message Risk Scanner</h2>
+            <p class="muted">Paste an SMS, email, or message below to analyze it.</p>
+
+            <form method="POST" action="/">
+                <textarea
+                    id="message"
+                    name="message"
+                    maxlength="10000"
+                    placeholder="Example: Your account will be blocked. Verify your account immediately..."
+                    required>{{ message | e }}</textarea>
+
+                <div class="input-bottom">
+                    <span>🔒 Analysis runs on your local application</span>
+                    <span id="charCount">0 / 10000</span>
+                </div>
+
+                <button class="full" type="submit">Analyze Message →</button>
+            </form>
+
+            {% if warning %}
+                <div class="result yellow">{{ warning }}</div>
+            {% endif %}
+
+            {% if result %}
+                <div class="result">
+
+                    <div class="result-title {% if result == 'Phishing' %}red{% elif result == 'Legitimate' %}green{% else %}yellow{% endif %}">
+                        {% if result == 'Phishing' %}
+                            ⚠ PHISHING DETECTED
+                        {% elif result == 'Legitimate' %}
+                            ✓ LIKELY LEGITIMATE
+                        {% else %}
+                            ? UNCERTAIN RESULT
+                        {% endif %}
+                    </div>
+
+                    <p class="muted">
+                        Model confidence: <strong>{{ confidence }}%</strong>
+                    </p>
+
+                    <div class="bar">
+                        <div class="bar-fill" style="width: {{ confidence }}%"></div>
+                    </div>
+
+                    {% if cues %}
+                        <p><strong>Suspicious cues found:</strong></p>
+                        {% for cue in cues %}
+                            <span class="cue">{{ cue }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <p class="muted">No rule-based suspicious phrases were detected.</p>
+                    {% endif %}
+
+                    <p class="notice">
+                        This is an automated estimate, not a guarantee.
+                        Avoid clicking unexpected links or sharing passwords
+                        and OTPs. Verify important messages through official channels.
+                    </p>
+
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Risk analytics -->
+        <div class="panel">
+            <h2>📊 Risk Analytics</h2>
+
+            {% if stats.total_scans > 0 %}
+                <div class="chart-wrap">
+                    <div class="donut"
+                        style="--phish: {{ (stats.phishing_count / stats.total_scans * 100) | round(2) }}%;
+                               --legit: {{ ((stats.phishing_count + stats.legitimate_count) / stats.total_scans * 100) | round(2) }}%;">
+                        <div class="donut-inner">
+                            <strong style="font-size:25px">{{ stats.total_scans }}</strong>
+                            <span class="muted" style="font-size:11px">Total scans</span>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div>
+                            <span class="dot" style="background:var(--red)"></span>
+                            Phishing: <strong>{{ stats.phishing_count }}</strong>
+                        </div>
+
+                        <div>
+                            <span class="dot" style="background:var(--green)"></span>
+                            Legitimate: <strong>{{ stats.legitimate_count }}</strong>
+                        </div>
+
+                        <div>
+                            <span class="dot" style="background:var(--yellow)"></span>
+                            Uncertain: <strong>{{ stats.uncertain_count }}</strong>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="empty">Your risk analytics will appear after your first scan.</p>
+            {% endif %}
+
+            <div class="notice">
+                <strong>About this scanner</strong><br>
+                PhishShift combines a trained text-classification model with
+                suspicious-phrase checks. Results depend on the training data
+                and may be incorrect.
+            </div>
+
+            <p style="margin-top:20px">
+                <a class="download" href="/download-report">⬇ Download CSV Report</a>
+            </p>
+        </div>
+
+    </section>
+
+    <!-- Scan history -->
+    <section class="panel history-panel">
+        <h2>🕘 Recent Scan History</h2>
+        <p class="muted">
+            Showing your latest 20 scans. The CSV report includes all saved scans.
+        </p>
+
+        {% if history %}
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>MESSAGE</th>
+                            <th>RESULT</th>
+                            <th>CONFIDENCE</th>
+                            <th>SUSPICIOUS CUES</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in history %}
+                            <tr>
+                                <td>{{ item.time }}</td>
+                                <td class="message-cell">{{ item.message }}</td>
+                                <td class="pill {% if item.result == 'Phishing' %}red{% elif item.result == 'Legitimate' %}green{% else %}yellow{% endif %}">
+                                    {{ item.result }}
+                                </td>
+                                <td>{{ item.confidence }}%</td>
+                                <td>{{ item.cues | join(', ') if item.cues else 'None' }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="empty">
+                No scans yet. Analyze a message above to create your first history entry.
+            </p>
+        {% endif %}
+    </section>
+
+    <footer>PhishShift · Message Risk Scanner · Educational cybersecurity project</footer>
+</div>
+
+<script>
+    const messageInput = document.getElementById("message");
+    const charCount = document.getElementById("charCount");
+
+    function updateCount() {
+        charCount.textContent = `${messageInput.value.length} / 10000`;
+    }
+
+    messageInput.addEventListener("input", updateCount);
+    updateCount();
+</script>
+
+</body>
+</html>
