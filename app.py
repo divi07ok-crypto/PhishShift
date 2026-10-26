@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_FILE = os.path.join(BASE_DIR, "models", "phishshift_model.pkl")
+MODEL_FILE = os.path.join(BASE_DIR, "phishshift_model.pkl")
 HISTORY_FILE = os.path.join(BASE_DIR, "scan_history.json")
 
 MAX_HISTORY = 500
